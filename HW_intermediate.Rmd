@@ -1,0 +1,129 @@
+---
+title: "HW_intermediate"
+author: "Jackson Barratt Heitmann"
+date: "1/13/2022"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+#names of the three iris species
+sp_ids = unique(iris$Species)
+
+output = matrix(0, nrow=length(sp_ids), ncol=ncol(iris)-1)
+rownames(output) = sp_ids
+colnames(output) = names(iris[ , -ncol(iris)])
+
+#we made a 3x4 matrix with species as rows, and different measurements as columns
+dim(output)
+
+# this is that sequence of sp_ids which is just setosa, versicolor, virginica
+for(i in seq_along(sp_ids)) {
+  #now we create a new data frame and we want everything except the species column from iris, species we are going to call just the sequence we made above so there's only 3 rows, not 60
+    iris_sp = subset(iris, subset=Species == sp_ids[i], select=-Species)
+    #now another for loop, we are defining some object j, and we want to go from 1 to the number of columns, this is just the different measurements
+    for(j in 1:(ncol(iris_sp))) {
+        x = 0
+        y = 0
+        # so start with the first sp_id setosa because its greater than 1
+        # and start counting the values for each one of those columns, then divide it         by the number of values that we have (find the mean)
+            for(k in 1:nrow(iris_sp)) {
+                x = x + iris_sp[k, j]
+                y = y + 1
+            }
+            output[i, j] = x / y 
+        
+    }
+}
+output
+
+print(x)
+```
+1. The object output is calculating the mean values of each quanitity (Sepal Length, Sepal Width, etc) within each of the 3 iris species. 
+
+2. Loop from *i* to the length of the sp_id or species identity
+   Subset the iris data set, select everything except species, species we are going     to make equal to the sp_id sequence we created above, so we only have 3 rows
+    Loop from 1 to the number of columns in this subsetted iris data set
+    Create two variables, *x* and *y* and set them equal to 0
+    Create another loop from *k* to the number of rows of iris_sp, which contains all the original rows of data (50 for each species) 
+    Take *x* and make it equal to itself plus the indexed value [*k*,*j*]. The indexed value is a single value, that we want to count up, then divide by the total number of values. 
+    Now, create an output that is a data frame that contains the mean values of each of the 3 species of 4 different measurements of the plants. 
+    
+
+3. x = *sum* sum function
+    y = *n* length or sample size function
+    output = iris_sp_means
+
+4. To decrease the number of loops get rid of the *if* (nrow(iris_sp) > 0)
+
+5. Loop summing each value sequentially.
+```{r}
+x <- 1:10
+
+print(x)
+for (i in x){
+  y <- NULL
+  
+  y[i]<-sum(x[1:i])
+   
+    if (y[i]>0){
+      y<-y[i]
+    }
+  print(y)
+}
+
+```
+6. Loop summing each value sequentially but returning *NA* for each value over 10.
+```{r} 
+
+x <- 1:10
+
+print(x)
+for (i in x){
+  y <- NULL
+  
+  y[i]<-sum(x[1:i])
+
+  if (y[i] > 10){ 
+    
+    y<-'NA'
+  }
+  else {
+    y <- (y[i])
+  }
+  print(y)
+  
+}
+
+```
+
+7. Function that replicates the same output as the loop above.
+```{r}
+
+sequential_sum <- function (x){
+  y <- NULL
+  for (i in x){
+    
+    y[i]<- sum(x[1:i])
+    
+    if(y[i]<=10){
+      y[i] <- y[i]
+    }
+    else {
+      y[i] <- NA
+    }
+    
+  }
+ 
+  return(y)
+}
+
+sequential_sum(x)
+```
+
+
