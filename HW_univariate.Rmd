@@ -1,0 +1,98 @@
+---
+title: "HW_Univariate"
+author: "Jackson Barratt Heitmann"
+date: "1/26/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+trees <- read.csv('https://raw.githubusercontent.com/dmcglinn/quant_methods/gh-pages/data/treedata_subset.csv')
+
+trees
+
+# we wish to model species cover across all sampled plots
+# create site x sp matrix for two species 
+sp_cov = with(trees, tapply(cover, list(plotID, spcode), 
+                           function(x) round(mean(x))))
+sp_cov = ifelse(is.na(sp_cov), 0, sp_cov)
+sp_cov = data.frame(plotID = row.names(sp_cov), sp_cov)
+# create environmental matrix
+cols_to_select = c('elev', 'tci', 'streamdist', 'disturb', 'beers')
+env = aggregate(trees[ , cols_to_select], by = list(trees$plotID), 
+                function(x) x[1])
+names(env)[1] = 'plotID'
+# merge species and enviornmental matrices
+site_dat = merge(sp_cov, env, by='plotID')
+# subset species of interest
+abies = site_dat[ , c('ABIEFRA', cols_to_select)]
+acer  = site_dat[ , c('ACERRUB', cols_to_select)]
+names(abies)[1] = 'cover'
+names(acer)[1] = 'cover'
+
+site_dat
+library(tidyverse)
+library(dplyr)
+
+acer_mod<- lm(acer$cover~acer$elev+acer$tci+acer$beers+acer$disturb)
+summary(acer_mod)
+
+
+abies_mod <- lm(abies$cover~abies$elev+abies$streamdist+abies$disturb)
+summary(abies_mod)
+
+
+
+install.packages("car")
+library(car)
+Anova(acer_mod, type=3)
+Anova(abies_mod, type=3)
+
+library(MASS)
+stepAIC(acer_mod)
+stepAIC(abies_mod)
+
+plot(acer_mod)
+plot(abies_mod)
+
+```
+
+1. The models do have a statistically significant explanation of the cover for both Acer rubrum (r^2 adjusted = 0.1675) and Abies fraseri (r^2 adjusted = 0.2379). The adjusted r^2 value suggests that the Acer model explains about 16% of the variation, while the Abies model explains about 23% of the variation. This is a fairly low correlation for both models.   
+
+For Acer the most important predictors of cover were elevation, tci, beers, and disturbance. For Abies the most important predictor variables were elevation, stream distribution and disturbance. 
+
+The model residuals for both of these models do not seem to conform to normality. The residuals are fairly kurtotic, meaning the models most likley deviate from normal assumptions.  
+
+The Abies model explains cover better than the Acer model. This is not surprising because we know that Abies is a specialist tree, whose distribution across the landscape is (likley) more heavily impacted by disturbance than Acer, which is a generalist. 
+
+```{r}
+acer_poi <- glm(acer$cover~acer$elev+acer$tci+acer$beers+acer$disturb, family='poisson')
+
+summary(acer_poi)
+
+acer_poi_r2 <- (1 - acer_poi$deviance/acer_poi$null.deviance)
+print(acer_poi_r2)
+
+
+abies_poi <- glm(abies$cover~abies$elev+abies$streamdist+abies$disturb+abies$tci, 
+      family='poisson')
+
+summary(abies_poi)
+
+
+abies_poi_r2 <- (1 - abies_poi$deviance/abies_poi$null.deviance)
+
+print(abies_poi_r2)
+```
+
+2. It seems that the poisson error distribution doesn't alter the explained variation in the Acer model (psuedo r^2 = 0.13), but did much better explaining the Abies model (psuedo r^2 = 0.89). The glm model for Acer did not include any additional explanatory variables. The Abies glm included the tci variable in addition to all the previous explanatory variables from the lm model. Changing the error distribution did alter the results quite dramatically for the Abies model. The lm only explained around 23% of the variation while this glm explains nearly 90% of the variation. 
+
+
+3. Poisson takes the 0s into account better. 
