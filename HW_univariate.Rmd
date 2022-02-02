@@ -39,21 +39,29 @@ names(acer)[1] = 'cover'
 
 site_dat
 library(tidyverse)
+library(ggplot2)
 library(dplyr)
 
-acer_mod<- lm(acer$cover~acer$elev+acer$tci+acer$beers+acer$disturb)
+acer_mod<- lm(acer$cover ~ acer$elev + acer$tci + acer$beers + acer$disturb)
 summary(acer_mod)
 
+ggplot(data = acer, aes(x = elev, y = cover)) + geom_point() + theme_bw()
 
-abies_mod <- lm(abies$cover~abies$elev+abies$streamdist+abies$disturb)
+ggplot(data = acer, aes(x = disturb, y = cover)) + geom_boxplot() + theme_bw()
+
+abies_mod <- lm(abies$cover ~ abies$elev + abies$disturb)
 summary(abies_mod)
 
+ggplot(data = abies, aes(x = elev, y = cover)) + geom_point() + theme_bw()
 
+ggplot(data = abies, aes(x = streamdist, y = cover)) + geom_point() + theme_bw()
+
+ggplot(data = abies, aes(x = disturb, y = cover)) + geom_boxplot() + theme_bw()
 
 install.packages("car")
 library(car)
-Anova(acer_mod, type=3)
-Anova(abies_mod, type=3)
+Anova(acer_mod, type = 3)
+Anova(abies_mod, type = 3)
 
 library(MASS)
 stepAIC(acer_mod)
@@ -64,35 +72,53 @@ plot(abies_mod)
 
 ```
 
-1. The models do have a statistically significant explanation of the cover for both Acer rubrum (r^2 adjusted = 0.1675) and Abies fraseri (r^2 adjusted = 0.2379). The adjusted r^2 value suggests that the Acer model explains about 16% of the variation, while the Abies model explains about 23% of the variation. This is a fairly low correlation for both models.   
+1. The models do have a statistically significant explanation of the cover for both *Acer rubrum* (r^2 adjusted = 0.1675) and *Abies fraseri* (r^2 adjusted = 0.2379). The adjusted r^2 value suggests that the *Acer* model explains about 16% of the variation, while the *Abies* model explains about 23% of the variation. This is a fairly low correlation for both models.   
 
-For Acer the most important predictors of cover were elevation, tci, beers, and disturbance. For Abies the most important predictor variables were elevation, stream distribution and disturbance. 
+For *Acer* the most important predictors of cover were elevation, tci, beers, and disturbance. For *Abies* the most important predictor variables were elevation, stream distribution and disturbance. 
 
-The model residuals for both of these models do not seem to conform to normality. The residuals are fairly kurtotic, meaning the models most likley deviate from normal assumptions.  
+The model residuals for both of these models do not seem to conform to normality. The residuals are fairly kurtotic, meaning the models most likely deviate from normal assumptions.  
 
-The Abies model explains cover better than the Acer model. This is not surprising because we know that Abies is a specialist tree, whose distribution across the landscape is (likley) more heavily impacted by disturbance than Acer, which is a generalist. 
+The *Abies* model explains cover better than the *Acer* model. This is not surprising because we know that *Abies* is a specialist tree, whose distribution across the landscape is (likley) more heavily impacted by disturbance than *Acer*, which is a generalist. 
 
 ```{r}
-acer_poi <- glm(acer$cover~acer$elev+acer$tci+acer$beers+acer$disturb, family='poisson')
+acer_poi <- glm(acer$cover ~ acer$elev + acer$tci + acer$beers + 
+                  acer$disturb, family = 'poisson')
 
 summary(acer_poi)
 
-acer_poi_r2 <- (1 - acer_poi$deviance/acer_poi$null.deviance)
+acer_poi_r2 <- (1 - acer_poi$deviance / acer_poi$null.deviance )
 print(acer_poi_r2)
 
 
-abies_poi <- glm(abies$cover~abies$elev+abies$streamdist+abies$disturb+abies$tci, 
-      family='poisson')
+abies_poi <- glm(abies$cover ~ abies$elev + 
+              abies$disturb + abies$tci + abies$streamdist, family = 'poisson')
 
 summary(abies_poi)
 
 
-abies_poi_r2 <- (1 - abies_poi$deviance/abies_poi$null.deviance)
+abies_poi_r2 <- (1 - abies_poi$deviance / abies_poi$null.deviance )
 
 print(abies_poi_r2)
 ```
 
-2. It seems that the poisson error distribution doesn't alter the explained variation in the Acer model (psuedo r^2 = 0.13), but did much better explaining the Abies model (psuedo r^2 = 0.89). The glm model for Acer did not include any additional explanatory variables. The Abies glm included the tci variable in addition to all the previous explanatory variables from the lm model. Changing the error distribution did alter the results quite dramatically for the Abies model. The lm only explained around 23% of the variation while this glm explains nearly 90% of the variation. 
+2. It seems that the poisson error distribution doesn't alter the explained variation in the Acer model (psuedo r^2 = 0.13), but did much better explaining the *Abies* model (psuedo r^2 = 0.89). The glm model for *Acer* did not include any additional explanatory variables. The *Abies* glm included the tci variable in addition to all the previous explanatory variables from the lm model. Changing the error distribution did alter the results quite dramatically for the *Abies* model. The lm only explained around 23% of the variation while this glm explains nearly 90% of the variation. 
 
 
-3. Poisson takes the 0s into account better. 
+3. *Acer Rubrum* and *Abies fraseri* cover are both explained best by the elevation variable. Acer occurs across the elevation gradient while *Abies* only occurs at higher elevations, and is probably why the model fits considerably better for *Abies* than *Acer*, because their distributions as shown in the plots above differ greatly. *Acer* actually has a negative slope, meaning that as elevation goes up, *Acer rubrum* cover goes down. *Abies fraseri* cover has a positive slope as elevation increases. *Abies* had considerably more 0s in the dataset, which could be why model fit was better overall because there was certainly an elevation threshold for that species' distribution, whereas *Acer* occurs at all elevations < 1500 m. 
+
+Additionally, *Abies fraseri* and *Acer Rubrum* were significantly impacted by 
+
+
+```{r}
+
+acer_AIC <- lm(data = acer, cover ~ elev + tci + streamdist + disturb + beers)
+
+stepAIC(acer_AIC)
+
+abies_AIC <- lm(data = abies, cover ~ elev + tci + streamdist + disturb + beers)
+
+stepAIC(abies_AIC)
+```
+
+4. The stepAIC function here gives me the same output as the glm models for 
+both the Acer rubrum model andAbies fraseri model. The stepAIC output for the Abies fraseri model includes both tci and streamdist, which only reduce the AIC fit by 1 and 3 units respectively, which make my confident that they could be excluded from the original lm model I made, and even though statistically significant, I am not convinced that they are necessary. 
