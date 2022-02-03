@@ -49,6 +49,8 @@ ggplot(data = acer, aes(x = elev, y = cover)) + geom_point() + theme_bw()
 
 ggplot(data = acer, aes(x = disturb, y = cover)) + geom_boxplot() + theme_bw()
 
+ggplot(data = acer, aes(x = tci, y = cover)) + geom_point() + theme_bw()
+
 abies_mod <- lm(abies$cover ~ abies$elev + abies$disturb)
 summary(abies_mod)
 
@@ -57,6 +59,10 @@ ggplot(data = abies, aes(x = elev, y = cover)) + geom_point() + theme_bw()
 ggplot(data = abies, aes(x = streamdist, y = cover)) + geom_point() + theme_bw()
 
 ggplot(data = abies, aes(x = disturb, y = cover)) + geom_boxplot() + theme_bw()
+
+ggplot(data = abies, aes(x = streamdist, y = cover)) + geom_point() + theme_bw()
+
+ggplot(data = abies, aes(x = tci, y = cover)) + geom_point() + theme_bw()
 
 install.packages("car")
 library(car)
@@ -131,9 +137,24 @@ elevation goes up, *Acer rubrum* cover goes down. *Abies fraseri* cover has a
 positive slope as elevation increases. *Abies* had considerably more 0s in the
 dataset, which could be why model fit was better overall because there was 
 certainly an elevation threshold for that species' distribution, whereas *Acer*
-occurs at all elevations < 1500 m. 
+occurs at all elevations < 1500 m at varying degrees of canopy cover. 
 
-Additionally, *Abies fraseri* and *Acer Rubrum* were significantly impacted by 
+Additionally, *Abies fraseri* and *Acer Rubrum* were significantly impacted by
+disturbance. *Acer* cover was lower in virigin forest compared to corporate
+logging, selective logging, and settled habitats. *Acer* may be promoted for
+hardwood production in the logging industry making it a more dominant canopy tree
+in the other 3 disturbance regimes. *Abies* was significantly impacted by
+disturbance but the boxplots above indicate that it is very difficult to decipher
+a meaningful conclusion.   
+
+Finally, tci had a significant reduction in *Acer* cover and a significant
+increase in *Abies* cover. Once again, from the plots above there are so many 0s
+in this dataset, it maybe that *Abies* prefers moist seeps in the mountainside,
+while *Acer* prefers drier soil, but it is difficult to discern that visually from
+the plots above. 
+
+*Abies* did show a reduction in cover as you get closer to streams, but this may 
+have to do with topographic variation more than the actual species distribution. 
 
 
 ```{r}
