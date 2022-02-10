@@ -82,15 +82,17 @@ text(dune_cca_all, display='cn', col='red')
 3. This analysis complements the previous analysis, but adds two
 additional explanatory variables to explain the variance. From this plot
 we can tell that moisture content is still the most important explanatory
-variable, as it explains the CCA1 axis directionality. The soil thickness
-variable is also important along that first axis in explaining species
-cover. Lastly, we see that the different management factors do change
-species cover along that second axis (meaning it is less important than
-both soil and moisture). We can see that Nature Management centroid is
-located higher, and is associated with the cover of a few species
-hovering around the 3 value of the CCA2 axis. Those species are probabbly
-associated with higher quality habitat, that is less prone to
-disturbance. In the opposite direction lies the Standard Farming centroid
-which is probably associated with disturbance prone plant species.
+variable, as it explains the CCA1 axis directionality. This is something
+that we noticed in the MDS model, but the relative importance is not
+noticable in that previous MDS model, but is more apparent in this CCA.
+The soil thickness variable is also important along that first axis in explaining speciescover. Lastly, we see that the different management factors do change species cover along that second axis (meaning it is less important than both soil and moisture). We can see that Nature Management centroid is located higher, and is associated with the cover of a few species hovering around the 3 value of the CCA2 axis. Those species are probabbly associated with higher quality habitat, that is less prone to disturbance. In the opposite direction lies the Standard Farming centroid which is probably associated with disturbance prone plant species.
+
+With all of this said, the adjusted r squared value for the model ~
+Moisture + Management + Soil = 0.28. So only about 28% of the variation
+in the data is explained by our 3 explanatory variables. When broken down
+Moisture and Management explain about ~10-12% of the variation, and Soil
+explains ~5%. This means that the model is not all that robust in
+explaining variation in species cover in these dune habitats. 
+
 
 
