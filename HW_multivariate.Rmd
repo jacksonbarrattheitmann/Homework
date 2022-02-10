@@ -29,7 +29,18 @@ dune_mds<- metaMDS(dune)
         col=color_vect, pch=19)
 ```
 
-1. In this graph we have included all of the variables in the NMDS (moisture, Management, Use, Manure, etc.), and look at how the different species aggregate on the plot. We've then color coded each species with it's moisture to see if that one variable is driving some of the variation in the NMDS1 component, or the NMDS2 component. We can see from the plot that moisture=4 species are being explained positively by NMDS1, and moisture=2 species are being explained negatively by NMDS1. This means that moisture is certainly explaining some of the variation we are seeing in these species, however, the different moisture are not tightly packed along the NMDS2 axis, meaning there must be some other variable driving the variation that we see between species, even within their shared moisture parameters.  
+1. In this graph we have included all of the variables in the NMDS
+(moisture, Management, Use, Manure, etc.), and look at how the different
+species aggregate on the plot. We've then color coded each species with
+it's moisture to see if that one variable is driving some of the
+variation in the NMDS1 component, or the NMDS2 component. We can see from
+the plot that moisture=4 species are being explained positively by NMDS1,
+and moisture=2 species are being explained negatively by NMDS1. This
+means that moisture is certainly explaining some of the variation we are
+seeing in these species, however, the different moisture are not tightly
+packed along the NMDS2 axis, meaning there must be some other variable
+driving the variation that we see between species, even within their
+shared moisture parameters.  
 
 
 2. 
