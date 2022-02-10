@@ -18,6 +18,7 @@ print(dune.env)
 
 dune_mds<- metaMDS(dune)
 
+
  plot(dune_mds, type='n')
  text(dune_mds, 'sp', cex=.5)
  # generate vector of colors 
@@ -28,4 +29,57 @@ dune_mds<- metaMDS(dune)
         col=color_vect, pch=19)
 ```
 
-1. In this graph we have included all of the variables in the NMDS (moisture, Management, Use, Manure, etc.), and look at how the different species aggregate on the plot. We've then color coded each species with it's moisture to see if that one variable is driving some of the variation in the NMDS1 component, or the NMDS2 component. We can see from the plot that moisture=4 species are being explained positively by NMDS1, and moisture=2 species are being explained negatively by NMDS1. This means that moisture is certainly explaining some of the variation we are seeing in these species, however, the different moisture are not tightly packed along the NMDS2 axis, meaning there must be some other variable driving the variation that we see between species, even within their shared mositure parameters.    
+1. In this graph we have included all of the variables in the NMDS (moisture, Management, Use, Manure, etc.), and look at how the different species aggregate on the plot. We've then color coded each species with it's moisture to see if that one variable is driving some of the variation in the NMDS1 component, or the NMDS2 component. We can see from the plot that moisture=4 species are being explained positively by NMDS1, and moisture=2 species are being explained negatively by NMDS1. This means that moisture is certainly explaining some of the variation we are seeing in these species, however, the different moisture are not tightly packed along the NMDS2 axis, meaning there must be some other variable driving the variation that we see between species, even within their shared moisture parameters.  
+
+
+2. 
+```{r}
+dune.env$Moisture <- as.numeric(dune.env$Moisture)
+class(dune.env$Moisture)
+
+dune_cca_all <- cca(dune ~ Moisture + Management + A1, data = dune.env)
+
+dune_cca_moist <- cca(dune ~ Moisture, data = dune.env)
+
+dune_cca_manage <- cca(dune ~ Management, data = dune.env)
+
+dune_cca_manure <- cca(dune ~ Manure, data = dune.env)
+
+dune_cca_soil <- cca(dune ~ A1, data = dune.env)
+
+RsquareAdj(dune_cca_all, 999)
+RsquareAdj(dune_cca_moist, 999)
+RsquareAdj(dune_cca_manage, 999)
+RsquareAdj(dune_cca_soil, 999)
+RsquareAdj(dune_cca_manure, 999)
+
+
+plot(dune_cca_all)
+
+print(dune_cca_all)
+
+anova(dune_cca_all, by='margin', permutations = 999)
+
+dune_cca_less <- update(dune_cca_all, . ~ . - Manure)
+anova(dune_cca_less, dune_cca_all)
+
+plot(dune_cca_all, type='n', scaling=1)
+orditorp(dune_cca_all, display='sp', cex=0.5, scaling=1, col='blue')
+text(dune_cca_all, display='cn', col='red')
+```
+
+3. This analysis complements the previous analysis, but adds two
+additional explanatory variables to explain the variance. From this plot
+we can tell that moisture content is still the most important explanatory
+variable, as it explains the CCA1 axis directionality. The soil thickness
+variable is also important along that first axis in explaining species
+cover. Lastly, we see that the different management factors do change
+species cover along that second axis (meaning it is less important than
+both soil and moisture). We can see that Nature Management centroid is
+located higher, and is associated with the cover of a few species
+hovering around the 3 value of the CCA2 axis. Those species are probabbly
+associated with higher quality habitat, that is less prone to
+disturbance. In the opposite direction lies the Standard Farming centroid
+which is probably associated with disturbance prone plant species.
+
+
