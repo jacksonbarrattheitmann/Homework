@@ -66,7 +66,15 @@ mantel(geo_dist, comm_dist)
 
 ```
 
-1. It seems like there is spatial dependence for the common but not the rare species. We can see from the plots that there is some spatial autocorrelation for the common species, i.e. the further away we sample the further away the common species aggregate. However, for our rare species, it doesn't look like we have any spatial autocorrelation, evident from the flat line, indicating that being closer to sample where we recorded a rare species doesn't make us any more likely to record that rare species. 
+1. It seems like there is spatial dependence for the common but not the rare species. We can
+see from the plots that there is some spatial autocorrelation for the common species, i.e. the
+further away we sample the further away the common species aggregate. However, for our rare
+species, it doesn't look like we have any spatial autocorrelation, evident from the flat line,
+indicating that being closer to sample where we recorded a rare species doesn't make us any
+more likely to record that rare species. The results of mantel corroborate our visual
+evidence, for common species (r = 0.34, p = 0.001) and for the rare species (r = -0.08, 
+p = 0.91). 
+
 
 ```{r}
 
