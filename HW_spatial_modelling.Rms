@@ -1,0 +1,153 @@
+---
+title: "HW_spatial_modelling"
+author: "Jackson Barratt Heitmann"
+date: "2/22/2022"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(vegan)
+data(BCI)
+## UTM Coordinates (in metres)
+BCI_xy = data.frame(x = rep(seq(625754, 626654, by=100), each=5), 
+                    y = rep(seq(1011569,  1011969, by=100), len=50))
+
+plot(BCI_xy)
+
+#colSums because species are always the columns, and sites are the rows
+sr <- colSums(BCI > 0)
+hist(sr, breaks=7)
+boxplot(sr)
+print(sr)
+quantile(sr)
+
+sr_log <- log(sr)
+
+sr_log
+quantile(sr_log)
+
+#tells you the index of the species that satisfy the statement
+which(sr_log > 1.6 & sr_log < 1.7)
+which(sr_log > 3.5 & sr_log < 3.6)
+
+rare_sp <- BCI[ , 132]
+
+comm_sp <- BCI[ , 62]
+
+#rare sp plot
+plot(BCI_xy, cex = rare_sp / max(rare_sp))
+
+#comm sp plot
+plot(BCI_xy, cex = comm_sp / max(comm_sp))
+
+geo_dist <- dist(BCI_xy)
+
+rare_dist <- dist(rare_sp)
+
+comm_dist <- dist(comm_sp)
+
+par(mfrow = c(1,2))
+plot(geo_dist, rare_dist, main = 'rare sp' )
+lines(lowess(geo_dist, rare_dist), lwd = 2, col = "red")
+plot(geo_dist, comm_dist, main = ' common sp')
+lines(lowess(geo_dist, comm_dist), lwd = 2, col = "blue")
+
+
+cor(geo_dist, rare_dist)
+cor(geo_dist, comm_dist)
+
+mantel(geo_dist, rare_dist)
+mantel(geo_dist, comm_dist)
+
+```
+
+1. It seems like there is spatial dependence for the common but not the rare species. We can
+see from the plots that there is some spatial autocorrelation for the common species, i.e. the
+further away we sample the further away the common species aggregate. However, for our rare
+species, it doesn't look like we have any spatial autocorrelation, evident from the flat line,
+indicating that being closer to sample where we recorded a rare species doesn't make us any
+more likely to record that rare species. The results of mantel corroborate our visual
+evidence, for common species (r = 0.34, p = 0.001) and for the rare species (r = -0.08, 
+p = 0.91). 
+
+
+```{r}
+
+require(nlme)
+
+max_dist <- max(geo_dist) / 2
+
+sp_ids <- c("Cordia.lasiocalyx", "Hirtella.triandra",
+           "Picramnia.latifolia", "Quassia.amara",
+           "Tabernaemontana.arborea", "Trattinnickia.aspera", 
+           "Xylopia.macrantha", "Drypetes.standleyi")
+
+pred_sp <- BCI[ , sp_ids]
+print(pred_sp)
+
+# need to rename columns then specify in the model
+# using pred_sp$a ... 
+names(pred_sp) <- c('Cord', 'Hirt', 'Picra', 'Quass',
+                    'Taber', 'Tratt', 'Xylo', 'Dryp')
+# Model 1 - using just one species
+all_pred_sp <- data.frame(pred_sp, BCI_xy)
+
+sp_lm <-  gls(Dryp ~ Hirt, data=all_pred_sp)
+
+sp_exp <- update(sp_lm, corr=corExp(form= ~x + y, nugget = T), data = all_pred_sp)
+
+sp_rat_nug <- update(single_lm, corr=corRatio(form=~x + y, nugget=T))
+
+summary(sp_rat_nug)
+
+# Plotting the Variogram for Model 1
+plot(Variogram(sp_lm, form= ~ x + y))
+
+plot(Variogram(sp_exp, form = ~ x + y))
+
+plot(Variogram(sp_rat_nug, form = ~ x + y, resType = 'n'))
+
+#ANOVA to see which model fit best
+
+anova(sp_lm, sp_exp, sp_rat_nug)
+
+# Model 2 - all the species
+sp_lm_all <- gls(Dryp ~ Hirt + Cord + Picra + 
+                   Quass + Taber + Tratt + Xylo, data = all_pred_sp)
+
+sp_lm_exp <- update(sp_lm_all, corr=corExp(form = ~ x + y, nugget = T))
+
+sp_lm_rat <- update(sp_lm_all, corr=corRatio(form = ~ x + y, nugget = T))
+
+plot(Variogram(sp_lm_all, form = ~ Dryp + Hirt + Cord + Picra + 
+                   Quass + Taber + Tratt + Xylo))
+
+plot(Variogram(sp_lm_exp, resType = 'n'))
+
+plot(Variogram(sp_lm_rat, resType = 'n'))
+
+summary(sp_lm_exp)
+
+anova(sp_lm_all, sp_lm_exp, sp_lm_rat)
+
+```
+
+
+2. The single species model performed best when corrected with an
+ratio error term and a nugget. This performed much better than
+without a term at all, and better than the exponential model.
+However, in my single species model Hirt did not do a good job of
+predicting Dryp (t = 0.13, p = 0.89).
+
+The multi-species model performed best with an exponential spatial
+error term and a nugget. Looking at the multi-species model it looks
+like Tratt (t = 3.17, p = 0.002) and Xylo (t = 2.65, p = 0.01) do a
+fairly good job of predicting Dryp abundance. However, all the other
+species were not significant. This is not surprising, as maybe Tratt
+and Xylo are mutualists, or they have similar precipitation habitat
+requirments. 
